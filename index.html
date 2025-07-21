@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>الهيكل التنظيمي - تفرعات تحتية مباشرة</title>
+  <style>
+    body {
+      font-family: Tahoma, sans-serif;
+      background-image: url('node-16.png');
+      background-size: cover;
+      background-position: center 1px;
+      background-repeat: no-repeat;
+      margin: 20px;
+      direction: rtl;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 20px;
+      color: #222;
+      margin-top: 17px;
+      margin-bottom: 10px;
+      padding: 8px 20px;
+      border: 2px solid #1c1c1b6b;
+      border-radius: 2px;
+      background-color: transparent;
+      box-shadow: none;
+      display: inline-block;
+    }
+
+    .top-left-image {
+      position: absolute;
+      top: 20px;
+      left: 25px;
+      width: 7vw;
+      height: auto;
+      z-index: 999;
+    }
+
+    .side-text-box {
+      position: absolute;
+      top: 15px;
+      right: 25px;
+      text-align: center;
+      line-height: 1;
+      font-size: 10px;
+      font-weight: bold;
+      background-color: rgba(255, 255, 255, 0);
+      padding: 10px 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0);
+      z-index: 998;
+    }
+
+    .hierarchy {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 3%;
+    }
+
+    .level {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+      flex-wrap: wrap;
+      gap: 8px;
+      position: relative;
+    }
+
+    .node {
+      background-color: rgba(255, 249, 196, 0.9);
+      border: 2px solid #e6cc63;
+      border-radius: 6px;
+      padding: 17px 10px;
+      font-size: 16px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      min-width: 180px;
+      max-width: 220px;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: transform 0.2s;
+    }
+
+    .node:hover {
+      transform: scale(1.03);
+    }
+
+    .special-node {
+      background-color: #684c3769;
+      border-color: #64472f63;
+      cursor: default;
+    }
+
+    .node.has-sub::after {
+      content: " \25BC";
+      font-size: 9px;
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .line {
+      position: absolute;
+      width: 2px;
+      background-color: #e6cc63;
+      top: 100%;       /* يبدأ من أسفل العنصر */
+      bottom: -15px;   /* يمتد قليلاً للأسفل */
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: -1;
+    }
+
+    .sub-level,
+    .sub-sub-level {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 8px;
+      text-align: center;
+      padding: 0;
+      gap: 4px;
+      position: relative;
+    }
+
+    .sub-level.active,
+    .sub-sub-level.active {
+      display: flex;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .sub-level .node {
+      background-color: #fffbe6;
+      margin: 3px 0;
+      min-width: 90px;
+      font-size: 11px;
+      padding: 4px 8px;
+      max-width: 140px;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(107, 39, 39, 0.1);
+      border: 1.5px solid #e6cc63;
+      transition: background-color 0.2s;
+    }
+
+    .sub-level .node:hover {
+      background-color: #f0eaa3;
+    }
+
+    .sub-sub-level .node {
+      background-color: #fffef2;
+      margin: 2px 0;
+      font-size: 10px;
+      padding: 3px 6px;
+      min-width: 80px;
+      max-width: 120px;
+      border-radius: 3px;
+      border: 1px solid #d9d2a3;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: background-color 0.2s;
+    }
+
+    .sub-sub-level .node:hover {
+      background-color: #f7f6e7;
+    }
+
+    /* خط عمودي يربط الأب بالفروع */
+    .node.has-sub > .sub-level::before,
+    .node.has-sub > .sub-sub-level::before {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 10px;
+      background-color: #e6cc63;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: -1;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<img src="amana.png" alt="شعار الأمانة" class="top-left-image">
+
+<div class="side-text-box">
+  <p>المملكة العربية السعودية</p>
+  <p>وزارة الشؤون البلدية والقروية والإسكان</p>
+  <p>أمانة منطقة القصيم</p>
+  <p>الإدارة العامة للموارد البشرية</p>
+</div>
+
+<h1>الرسم البياني للهيكل التشغيلي لأمانة منطقة القصيم</h1>
+
+<div class="hierarchy">
+
+  <div class="level">
+    <div class="node special-node">أمين منطقة القصيم</div>
+  </div>
+
+  <div class="level">
+    <div class="line"></div>
+    <div class="node">مكتب الأمين</div>
+    <div class="node">إدارة مهرجانات بريدة</div>
+  </div>
+
+  <div class="level">
+    <div class="line"></div>
+
+    <div class="node has-sub" data-id="2">
+      الإدارة العامة للأنظمة والشؤون القانونية
+      <div class="sub-level" data-parent="2">
+        <div class="node">إدارة التنفيذ</div>
+        <div class="node">إدارة القضايا والمرافعات</div>
+        <div class="node">إدارة الإستشارات القانونية والدراسات</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="2">
+      الإدارة العامة للإعلام والاتصال المؤسسي      
+      <div class="sub-level" data-parent="2">
+        <div class="node">إدارة التسويق </div>
+        <div class="node">إدارة الاعلام </div>
+        <div class="node">إدارة العلاقات العامة </div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="2">
+      إدارة الاستثمارات العامة
+      <div class="sub-level" data-parent="2">
+        <div class="node">إدارة التخصيص </div>
+        <div class="node">إدارة تسويق الاستثمار </div>
+        <div class="node">إدارة تخطيط الاستثمار </div>
+        <div class="node">إدارة تنمية الاستثمارات </div>
+        <div class="node">إدارة استثمارات بلديات المنطقة</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="2">
+      وكالة شؤون البلديات
+      <div class="sub-level" data-parent="2">
+        <div class="node">وحدة روساء البلديات</div>
+        <div class="node">مساعد وكيل الأمين لشؤون البلديات</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="2">
+      الإدارة العامة للموارد البشرية
+      <div class="sub-level" data-parent="2">
+        <div class="node">إدارة شؤون موظفين البلديات</div>
+        <div class="node">إدارةالانضباط الوظيفي</div>
+        <div class="node">إدارةالتغيير والتواصل الداخلي</div>
+        <div class="node">إدارة عمليات الموارد البشرية</div>
+        <div class="node">إدارة تطوير الموارد البشرية</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="level">
+     <div class="line"></div>
+
+    <div class="node has-sub" data-id="2">
+      مكتب تحقيق الرؤيةو الأهداف 
+      <div class="sub-level" data-parent="2">
+        <div class="node">وحدة روساء البلديات</div>
+        <div class="node">مساعد مكتب تحقيق الرؤية والأهداف</div>
+      </div>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="node has-sub" data-id="3">
+      مكتب تنسيق المشاريع
+      <div class="sub-level" data-parent="3">
+        <div class="node">إدارة المتابعة والشكاوي</div>
+        <div class="node">إدارة رخص الحفريات</div>
+        <div class="node">إدارة تنسيق المشروعات الكبرى</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="5">
+      الإدارة العامة للمشاركة المجتمعية
+      <div class="sub-level" data-parent="5">
+        <div class="node">إدارة التطوع</div>
+        <div class="node">وحدة الشراكة المجتمعية</div>
+        <div class="node">إدارة الاستثمار المجتمعي</div>
+        <div class="node">إدارة الرقابة المجتمعية</div>
+        <div class="node">إدارة الإشراف على القطاع الثالث والجمعيات</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="6">
+      الإدارة العامة لتقنية المعلومات
+      <div class="sub-level" data-parent="6">
+        <div class="node">إدارة الجودة</div>
+        <div class="node">إدارة خدمات المعلومات</div>
+        <div class="node">إدارة تطوير التطبيقات الآلية</div>
+        <div class="node">مركز إتمام الشامل</div>
+        <div class="node">إدارة استمرارية الأعمال</div>
+        <div class="node">مكتب البنية المؤسسية</div>
+        <div class="node">إدارة هندسة وتشغيل وصيانة الحاسب الآلي</div>
+        <div class="node">وحدة إدارة مشاريع التحول الرقمي</div>
+        <div class="node">فريق الابتكار</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="2">
+      مكتب إدارة البيانات 
+      <div class="sub-level" data-parent="2">
+        <div class="node">قسم البيانات البلدية والإحصاء</div>
+        <div class="node">قسم إتاحة وإدارة البيانات</div>
+        <div class="node">قسم حماية البيانات الشخصية</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="level">
+    <div class="line"></div>
+
+    <div class="node has-sub" data-id="7">
+      الإدارة العامة للأمن السيبراني
+      <div class="sub-level" data-parent="7">
+        <div class="node">إدارة عمليات الأمن السيبراني</div>
+        <div class="node">إدارة الحوكمة والمخاطر والالتزام بالأمن السيبراني</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="8">
+      الإدارة العامة للمراجعة الداخلية
+      <div class="sub-level" data-parent="8">
+        <div class="node">وحدة متابعة المعاملات</div>
+        <div class="node">وحدة المخاطر</div>
+        <div class="node">وحدة الحوكمة والالتزام</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="9">
+      الإدارة العامة للامتثال
+      <div class="sub-level" data-parent="9">
+        <div class="node">إدارة التشوه البصري</div>
+        <div class="node">وحدة بلدي</div>
+        <div class="node">إدارة عمليات الامتثال</div>
+        <div class="node">إدارة إجراءات الامتثال</div>
+        <div class="node">إدارة متابعة جودة الأداء الرقابي</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="10">
+      الإدارة العامة للشؤون الإدارية والمالية
+      <div class="sub-level" data-parent="10">
+        <div class="node">إدارة الإيرادات</div>
+        <div class="node">إدارة الميزانية</div>
+        <div class="node">إدارة المستودع</div>
+        <div class="node">إدارة الأصول الثابتة</div>
+        <div class="node">مركز الوثائق والمحفوظات</div>
+        <div class="node">إدارة المشتريات والمناقصات</div>
+        <div class="node">إدارة الشؤون المالية</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="11">
+      وكالة شؤون الإسكان
+      <div class="sub-level" data-parent="11">
+        <div class="node">مساعد وكيل الأمين لشؤون الإسكان</div>
+        <div class="node">مكتب الوكيل</div>
+        <div class="node">الإدارة العامة لخدمات المنتجات السكنية</div>
+        <div class="node">الإدارة العامة لعمليات أراضي ومشاريع الإسكان</div>
+        <div class="node">الإدارة العامة لتحفيز المعروض السكني والتطوير العقاري</div>
+        <div class="node">الإدارة العامة لخدمات الإسكان التنموي</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="level">
+    <div class="line"></div>
+    <div class="node has-sub" data-id="12">
+      وكالة الخدمات
+      <div class="sub-level" data-parent="12">
+        <div class="node">مساعد وكيل الأمين للخدمات</div>
+        <div class="node">الإدارة العامة للحدائق</div>
+        <div class="node">الإدارة العامة للتشغيل والصيانة</div>
+        <div class="node">الإدارة العامة للنظافة</div>
+        <div class="node">الإدارة العامة للتحسين والتجميل</div>
+        <div class="node">الإدارة العامة لحماية البيئة</div>
+        <div class="node">الإدارة العامة للحركة وصيانة المعدات</div>
+        <div class="node has-sub" data-id="143">
+          الإدارة العامة للبلديات الفرعية
+          <div class="sub-sub-level" data-parent="143">
+            <div class="node">بلدية الديرة</div>
+            <div class="node">بلدية الصفراء</div>
+            <div class="node">بلدية شرق بريدة</div>
+            <div class="node">بلدية شمال بريدة</div>
+            <div class="node">بلدية غرب بريدة</div>
+            <div class="node">بلدية جنوب بريدة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="node has-sub" data-id="114">
+      بلديات المنطقة
+      <div class="sub-level" data-parent="114">
+        <div class="node">بلدية عنيزه</div>
+        <div class="node">بلدية الرس</div>
+        <div class="node">بلدية البكيرية</div>
+        <div class="node">بلدية المذنب</div>
+        <div class="node">بلدية الاسياح</div>
+        <div class="node">بلدية البدائع</div>
+        <div class="node">بلدية الرياض الخبراء</div>
+        <div class="node">بلدية الخبراء</div>
+        <div class="node">بلدية عيون الجواء</div>
+        <div class="node">بلدية ضرية</div>
+        <div class="node">بلدية البصر</div>
+        <div class="node">بلدية دخنة</div>
+        <div class="node">بلدية عقلة الصقور</div>
+        <div class="node">بلدية النبهانية</div>
+        <div class="node">بلدية الشماسية</div>
+        <div class="node">بلدية قبة</div>
+        <div class="node">بلدية القواره</div>
+        <div class="node">بلدية أبانات</div>
+        <div class="node">بلدية الفوارة</div>
+        <div class="node">بلدية العمار</div>
+        <div class="node">بلدية شري</div>
+        <div class="node">بلدية الفويلق</div>
+        <div class="node">بلدية قصيبا</div>
+        <div class="node">بلدية قصر بن عقيل</div>
+        <div class="node">بلدية الدليمية</div>
+        <div class="node">بلدية الظاهرية</div>
+        <div class="node">بلدية البطين</div>
+      </div>
+    </div>
+
+    <div class="node has-sub" data-id="115">
+      وكالة الشؤون الفنية
+      <div class="sub-level" data-parent="115">
+        <div class="node">الإدارة العامة لتنفيذ السيول</div>
+        <div class="node">الإدارة العامة لصيانة شبكات محطات السيول</div>
+        <div class="node">الإدارة العامة تنفيذ المباني</div>
+        <div class="node">الإدارة العامة تنفيذ الإنارة</div>
+        <div class="node">الإدارة العامة الدراسات</div>
+        <div class="node">الإدارة العامة تنفيذ الطرق</div>
+        <div class="node">الإدارة العامة للطوارئ والأزمات</div>
+        <div class="node">إدارة متابعة المخططات الخاصة</div>
+        <div class="node">ادارة متابعة المشاريع</div>
+        <div class="node">الإدارة العامة للنقل العام</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // تفعيل ظهور الفروع عند الضغط
+  document.querySelectorAll('.node.has-sub').forEach(node => {
+    node.addEventListener('click', () => {
+      const subLevel = node.querySelector('.sub-level, .sub-sub-level');
+      if (!subLevel) return;
+      subLevel.classList.toggle('active');
+    });
+  });
+</script>
+
+</body>
+</html>
